@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
+
+<VBox fx:id="vbPadre" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/14" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0">
+         <children>
+            <MediaView fx:id="mvMultimedia" fitHeight="470.0" fitWidth="800.0" layoutX="456.0" layoutY="16.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="240.0">
+               <cursor>
+                  <Cursor fx:constant="NONE" />
+               </cursor></MediaView>
+            <ListView fx:id="lvListaCanales" focusTraversable="false" layoutX="52.0" layoutY="260.0" onMouseClicked="#seleccionarCanal" prefHeight="550.0" prefWidth="450.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="120.0" />
+            <AnchorPane fx:id="apInfoCanal" layoutX="456.0" layoutY="431.0" prefHeight="190.0" prefWidth="800.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="40.0">
+               <children>
+                  <WebView fx:id="wvLogoCanal" layoutX="6.0" layoutY="35.0" maxHeight="190.0" maxWidth="190.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="190.0" prefWidth="190.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0" />
+                  <Label fx:id="lbNombreCanal" layoutX="165.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="590.0" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="15.0" />
+                  <Label fx:id="lbWebCanal" layoutX="165.0" layoutY="58.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="590.0" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="50.0" />
+                  <Label fx:id="lbPaisCanal" layoutX="164.0" layoutY="106.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="590.0" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="85.0" />
+                  <Label fx:id="lbTipoCanal" layoutX="210.0" layoutY="70.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="590.0" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="120.0" />
+                  <Label fx:id="lbEmisionCanal" layoutX="220.0" layoutY="80.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="590.0" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="155.0" />
+               </children>
+            </AnchorPane>
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="148.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="450.0" text="Selecciona el tipo de canal" textAlignment="CENTER" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Button fx:id="btListarCanalesTV" alignment="CENTER" contentDisplay="CENTER" layoutX="59.0" layoutY="86.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#listarCanalesTV" prefHeight="30.0" prefWidth="220.0" text="Canales de TV" textAlignment="CENTER" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="40.0" />
+            <Button fx:id="btListarCanalesRadio" layoutX="204.0" layoutY="86.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#listarCanalesRadio" prefHeight="30.0" prefWidth="220.0" text="Canales de Radio" AnchorPane.leftAnchor="240.0" AnchorPane.topAnchor="40.0" />
+            <ComboBox fx:id="cbFiltro" layoutX="14.0" layoutY="84.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#filtrarLista" prefHeight="30.0" prefWidth="450.0" promptText="Filtrar" visibleRowCount="100" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
+            <Button fx:id="btExportarLista" alignment="CENTER" contentDisplay="CENTER" layoutX="21.0" layoutY="658.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#exportarLista" prefHeight="30.0" prefWidth="220.0" text="Exportar lista" textAlignment="CENTER" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+            <Button fx:id="btExportarListaZIP" layoutX="319.0" layoutY="658.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#exportarListaZIP" prefHeight="30.0" prefWidth="220.0" text="Exportar y comprimir" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="240.0" />
+            <ProgressIndicator fx:id="piLoadMedia" layoutX="856.0" layoutY="453.0" />
+            <ProgressIndicator fx:id="piLoadChannels" layoutX="219.0" layoutY="379.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>
