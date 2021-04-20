@@ -5,14 +5,16 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Options {
+public class Channel {
 
-    private String format;
-    private String url;
+    private String name;
+    private String web;
+    private String logo;
+    private Option[] options;
 
     @Override
     public String toString() {
-        return format + url + "\n";
+        return name;
     }
 
 }

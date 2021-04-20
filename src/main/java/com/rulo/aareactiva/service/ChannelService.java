@@ -1,10 +1,10 @@
 package com.rulo.aareactiva.service;
 
 import com.rulo.aareactiva.domain.TDT;
-import rx.Observable;
 import retrofit2.http.GET;
+import rx.Observable;
 
-public interface CanalesService {
+public interface ChannelService {
 
     @GET("/lists/radio.json")
     Observable<TDT> getListaRadios();

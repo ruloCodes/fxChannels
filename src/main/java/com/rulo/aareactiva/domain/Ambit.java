@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Ambits {
+public class Ambit {
 
     private String name;
-    private Channels[] channels;
+    private Channel[] channels;
 
     @Override
     public String toString() {

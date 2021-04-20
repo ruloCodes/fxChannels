@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Countries {
+public class Countrie {
 
     private String name;
-    private Ambits[] ambits;
+    private Ambit[] ambits;
 
     @Override
     public String toString() {

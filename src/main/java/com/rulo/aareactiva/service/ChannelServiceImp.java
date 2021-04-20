@@ -8,24 +8,26 @@ import rx.Observable;
 
 import static com.rulo.aareactiva.util.Constants.URL_BASE;
 
-public class CanalesServiceImp {
+public class ChannelServiceImp implements ChannelService {
 
-    private CanalesService listas;
+    private final ChannelService listas;
 
-    public CanalesServiceImp() {
+    public ChannelServiceImp() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        listas = retrofit.create(CanalesService.class);
+        listas = retrofit.create(ChannelService.class);
     }
 
-    public Observable<TDT> getListasRadio() {
+    @Override
+    public Observable<TDT> getListaRadios() {
         return listas.getListaRadios();
     }
 
-    public Observable<TDT> getListasTV() {
+    @Override
+    public Observable<TDT> getListaTV() {
         return listas.getListaTV();
     }
 

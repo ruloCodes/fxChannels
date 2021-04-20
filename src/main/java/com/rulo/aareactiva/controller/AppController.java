@@ -1,7 +1,7 @@
 package com.rulo.aareactiva.controller;
 
 import com.rulo.aareactiva.domain.*;
-import com.rulo.aareactiva.service.CanalesServiceImp;
+import com.rulo.aareactiva.service.ChannelServiceImp;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +23,8 @@ import org.apache.commons.csv.CSVPrinter;
 import rx.schedulers.Schedulers;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,36 +34,31 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 public class AppController implements Initializable {
 
-    public ComboBox<Ambits> cbFiltro;
+    public Label lbNombreCanal, lbWebCanal, lbPaisCanal, lbTipoCanal, lbEmisionCanal;
+    public ProgressIndicator piLoadMedia, piLoadChannels;
     public ListView<ChannelData> lvListaCanales;
-    public WebView wvLogoCanal;
-    public Label lbNombreCanal;
-    public Label lbWebCanal;
-    public Label lbPaisCanal;
-    public Label lbTipoCanal;
-    public Label lbEmisionCanal;
+    public ComboBox<Ambit> cbFiltro;
     public MediaView mvMultimedia;
-    public ProgressIndicator piLoadMedia;
-    public ProgressIndicator piLoadChannels;
+    public WebView wvLogoCanal;
 
-    private CanalesServiceImp canalesService;
-    private ObservableList<Countries> countries;
-    private ObservableList<Ambits> ambits;
-    private ObservableList<Channels> channels;
+    private ChannelServiceImp canalesService;
+    private ObservableList<Countrie> countries;
+    private ObservableList<Ambit> ambits;
+    private ObservableList<Channel> channels;
     private ObservableList<ChannelData> channelsData;
 
     private Media media;
     private MediaPlayer player;
 
-    private File file;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        canalesService = new CanalesServiceImp();
+        canalesService = new ChannelServiceImp();
 
         countries = FXCollections.observableArrayList();
 
@@ -81,7 +78,7 @@ public class AppController implements Initializable {
     private void listarCanalesTV(ActionEvent event) {
         clearListView();
         piLoadChannels.setVisible(true);
-        canalesService.getListasTV()
+        canalesService.getListaTV()
                 .doOnCompleted(() -> piLoadChannels.setVisible(false))
                 .doOnError(throwable -> System.out.println("[Error] " + throwable.getMessage()))
                 .subscribeOn(Schedulers.from(Executors.newCachedThreadPool()))
@@ -92,7 +89,7 @@ public class AppController implements Initializable {
     private void listarCanalesRadio(ActionEvent event) {
         clearListView();
         piLoadChannels.setVisible(true);
-        canalesService.getListasRadio()
+        canalesService.getListaRadios()
                 .doOnCompleted(() -> piLoadChannels.setVisible(false))
                 .doOnError(throwable -> System.out.println("[Error] " + throwable.getMessage()))
                 .subscribeOn(Schedulers.from(Executors.newCachedThreadPool()))
@@ -128,83 +125,49 @@ public class AppController implements Initializable {
             setMedia(channel.getRepro());
     }
 
-    private void setMedia(String url) {
-        piLoadMedia.setVisible(true);
-        Thread thread = new Thread(() -> {
-            if (mvMultimedia.getMediaPlayer() != null)
-                player.stop();
-
-            media = new Media(url);
-
-            player = new MediaPlayer(media);
-            player.setOnReady(() -> piLoadMedia.setVisible(false));
-            player.setAutoPlay(true);
-
-            mvMultimedia.setMediaPlayer(player);
-        });
-        thread.start();
-    }
-
     @FXML
     private void exportarLista(ActionEvent event) {
-        CompletableFuture.runAsync(() -> {
-            Platform.runLater(() -> {
-                try {
-                    CSVExport();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-
-        });
+        CompletableFuture.runAsync(() -> Platform.runLater(this::CSVExport));
     }
-
-//    @FXML
-//    private void exportarListaZIP(ActionEvent event) {
-//        CompletableFuture.supplyAsync(() -> {
-//            Platform.runLater(() -> {
-//                try {
-//                    CSVExport();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//            return file;
-//        })
-//                .thenAcceptAsync(this::CSVCompress);
-//    }
 
     @FXML
     private void exportarListaZIP(ActionEvent event) {
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                return CSVExport();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }).thenAccept(System.out::println).whenComplete((a, b) -> System.out.println("Fin"));
-    }
+// --------- Así funciona bien ----------------------------------------------------------------//
+//        File file = CSVExport();
+//        CompletableFuture.supplyAsync(() -> file.getAbsolutePath().concat(".zip"))
+//                .thenAccept(System.out::println)
+//                .whenComplete((nada, error) -> Platform.runLater(() -> compressFile(file)));
+// --------------------------------------------------------------------------------------------//
 
-    private void clearListView() {
-        lvListaCanales.getItems().clear();
-        countries.clear();
-        ambits.clear();
-        channels.clear();
-        channelsData.clear();
+// --------- Así me tira un NullPointerException ----------------------------------------------//
+//        CompletableFuture.supplyAsync(this::CSVExport)
+//                .whenComplete((file, throwable) -> Platform.runLater(() -> compressFile(file)));
+// --------------------------------------------------------------------------------------------//
+
+// --------- Así no hace nada -----------------------------------------------------------------//
+//        CompletableFuture.supplyAsync(this::CSVExport)
+//                .whenComplete((file, throwable) -> {
+//                    System.out.println(file.getAbsolutePath());
+//                    Platform.runLater(() -> compressFile(file));
+//                });
+// --------------------------------------------------------------------------------------------//
     }
 
     private void setChannelsData(TDT lista) {
         Platform.runLater(() -> {
+            // Se rellena la lista de countries
             countries.addAll(Arrays.asList(lista.getCountries()));
-            for (Countries country : countries) {
-                ambits.addAll(Arrays.asList(country.getAmbits()));
-            }
-            for (Ambits ambit : ambits) {
-                channels.addAll(Arrays.asList(ambit.getChannels()));
-            }
 
-            for (Countries country : countries) {
+            // Se rellena la lista de ambits
+            for (Countrie country : countries)
+                ambits.addAll(Arrays.asList(country.getAmbits()));
+
+            // Se rellena la lista de channels
+            for (Ambit ambit : ambits)
+                channels.addAll(Arrays.asList(ambit.getChannels()));
+
+            // Se rellena la lista de channnelsData
+            for (Countrie country : countries) {
                 for (int j = 0; j < country.getAmbits().length; j++) {
                     for (int k = 0; k < country.getAmbits()[j].getChannels().length; k++) {
                         ChannelData channelData = ChannelData.builder()
@@ -222,19 +185,24 @@ public class AppController implements Initializable {
         });
     }
 
-    private int cuenta() {
-        for (int i = 0; i < 10; i++) {
-            System.out.println(i);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return 9;
+    private void setMedia(String url) {
+        piLoadMedia.setVisible(true);
+        Thread thread = new Thread(() -> {
+            if (mvMultimedia.getMediaPlayer() != null)
+                player.stop();
+
+            media = new Media(url);
+
+            player = new MediaPlayer(media);
+            player.setOnReady(() -> piLoadMedia.setVisible(false));
+            player.setAutoPlay(true);
+
+            mvMultimedia.setMediaPlayer(player);
+        });
+        thread.start();
     }
 
-    private File CSVExport() throws Exception {
+    private File CSVExport() {
         if (channelsData.size() == 0)
             return null;
 
@@ -244,56 +212,56 @@ public class AppController implements Initializable {
         if (fichero == null)
             return null;
 
-        FileWriter fileWriter = new FileWriter(fichero + ".csv");
-        CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
+        try {
+            FileWriter fileWriter = new FileWriter(fichero + ".csv");
+            CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
 
-        for (ChannelData channel : channelsData) {
-            printer.printRecord(
-                    channel.getNombre(),
-                    channel.getSitio(),
-                    channel.getRepro()
-            );
+            for (ChannelData channel : channelsData) {
+                printer.printRecord(
+                        channel.getNombre(),
+                        channel.getSitio(),
+                        channel.getRepro()
+                );
+            }
+
+            printer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        printer.close();
         return fichero;
-
-
-//        Platform.runLater(() -> {
-//            try {
-//                FileChooser fileChooser = new FileChooser();
-//                File fichero = fileChooser.showSaveDialog(null);
-//
-//                if (fichero == null)
-//                    return;
-//
-//                FileWriter fileWriter = new FileWriter(fichero + ".csv");
-//                CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
-//
-//                for (ChannelData channel : channelsData) {
-//                    printer.printRecord(
-//                            channel.getNombre(),
-//                            channel.getSitio(),
-//                            channel.getRepro()
-//                    );
-//                }
-//
-//                file = fileWriter;
-//                printer.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
     }
 
-    private void CSVCompress(File p) {
-        if (p == null) {
-            System.out.println("Nada que exportar");
-            return;
+    private void compressFile(File file) {
+        try {
+            System.out.println(file.getAbsolutePath());
+            FileOutputStream fos = new FileOutputStream(file.getAbsolutePath().concat(".zip"));
+            ZipOutputStream zos = new ZipOutputStream(fos);
+            FileInputStream fis = new FileInputStream(file.getAbsolutePath().concat(".csv"));
+            ZipEntry zipEntry = new ZipEntry(file.getName().concat(".csv"));
+
+            zos.putNextEntry(zipEntry);
+
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >=0){
+                zos.write(bytes, 0, length);
+            }
+            zos.close();
+            fis.close();
+            fos.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        System.out.println("Impirme: " + p);
-
+    private void clearListView() {
+        lvListaCanales.getItems().clear();
+        countries.clear();
+        ambits.clear();
+        channels.clear();
+        channelsData.clear();
     }
 
 }

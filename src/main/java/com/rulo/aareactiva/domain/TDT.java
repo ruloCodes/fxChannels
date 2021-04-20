@@ -9,6 +9,6 @@ import lombok.ToString;
 @ToString
 public class TDT {
 
-    private Countries[] countries;
+    private Countrie[] countries;
 
 }
