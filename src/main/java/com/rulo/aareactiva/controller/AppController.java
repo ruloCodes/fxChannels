@@ -22,11 +22,10 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import rx.schedulers.Schedulers;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +54,8 @@ public class AppController implements Initializable {
 
     private Media media;
     private MediaPlayer player;
+
+    private File file;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -131,7 +132,7 @@ public class AppController implements Initializable {
     }
 
     @FXML
-    private void exportarListaZIP(ActionEvent event) {
+    private void exportarListaZIP(Event event) {
 // --------- Así funciona bien ----------------------------------------------------------------//
 //        File file = CSVExport();
 //        CompletableFuture.supplyAsync(() -> file.getAbsolutePath().concat(".zip"))
@@ -151,6 +152,11 @@ public class AppController implements Initializable {
 //                    Platform.runLater(() -> compressFile(file));
 //                });
 // --------------------------------------------------------------------------------------------//
+
+        CompletableFuture.supplyAsync(() -> {
+            Platform.runLater(this::CSVExport);
+            return file;
+        }).thenAccept(csvFile -> Platform.runLater(() -> compressFile(file)));
     }
 
     private void setChannelsData(TDT lista) {
@@ -202,15 +208,15 @@ public class AppController implements Initializable {
         thread.start();
     }
 
-    private File CSVExport() {
+    private void CSVExport() {
         if (channelsData.size() == 0)
-            return null;
+            return;
 
         FileChooser fileChooser = new FileChooser();
         File fichero = fileChooser.showSaveDialog(null);
 
         if (fichero == null)
-            return null;
+            return;
 
         try {
             FileWriter fileWriter = new FileWriter(fichero + ".csv");
@@ -229,12 +235,11 @@ public class AppController implements Initializable {
             e.printStackTrace();
         }
 
-        return fichero;
+        file = fichero;
     }
 
     private void compressFile(File file) {
         try {
-            System.out.println(file.getAbsolutePath());
             FileOutputStream fos = new FileOutputStream(file.getAbsolutePath().concat(".zip"));
             ZipOutputStream zos = new ZipOutputStream(fos);
             FileInputStream fis = new FileInputStream(file.getAbsolutePath().concat(".csv"));
